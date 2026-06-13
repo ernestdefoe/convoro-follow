@@ -1,10 +1,10 @@
 {
   "id": "convoro-follow",
   "name": "Follow & Feed",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Follow members and get a personal feed of their latest topics and replies. Adds a Follow button to profiles and a Feed page. Opt-in.",
   "author": "Convoro",
-  "convoro": ">=1.17.1",
+  "convoro": ">=1.29.0",
   "type": "extension",
   "namespace": "Convoro\\Ext\\Follow\\",
   "provider": "Convoro\\Ext\\Follow\\Extension",

@@ -2,8 +2,7 @@
 
 namespace Convoro\Ext\Follow;
 
-use App\Support\Settings;
-use App\Support\Theme;
+use App\Support\ExtPage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -65,7 +64,7 @@ class Extension extends ServiceProvider
             });
 
             // The member's personal feed.
-            Route::get('/feed', fn () => response(self::page()));
+            Route::get('/feed', fn () => self::page());
         });
     }
 
@@ -116,16 +115,8 @@ class Extension extends ServiceProvider
         return array_slice($items, 0, 40);
     }
 
-    private static function page(): string
+    private static function page()
     {
-        $theme = Theme::css();
-        $palette = Theme::surfacePalette();
-        $chrome = Theme::chromeCss();
-        $header = Theme::siteHeader(['Feed' => '/feed']);
-        $font = Theme::fontStack((string) Settings::get('theme.font', 'Inter'));
-        $mode = htmlspecialchars((string) Settings::get('theme.mode', 'light'), ENT_QUOTES);
-        $name = htmlspecialchars((string) Settings::get('site.name', 'Convoro'), ENT_QUOTES);
-        $csrf = csrf_token();
         $e = fn ($v) => htmlspecialchars((string) $v, ENT_QUOTES);
         $grads = [
             'linear-gradient(135deg,#f472b6,#db2777)', 'linear-gradient(135deg,#60a5fa,#2563eb)',
@@ -149,16 +140,9 @@ class Extension extends ServiceProvider
             $items = '<div class="empty">Your feed is empty. Follow members from their profile and their topics &amp; replies will show up here.</div>';
         }
 
-        return <<<HTML
-<!DOCTYPE html><html lang="en" data-theme="{$mode}"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="csrf-token" content="{$csrf}"><title>Feed · {$name}</title>
-<style>{$theme}
-{$palette}
-{$chrome}
-*{box-sizing:border-box}body{margin:0;font-family:{$font};background:rgb(var(--c-bg));color:rgb(var(--c-text))}
-a{color:inherit;text-decoration:none}
-.wrap{max-width:680px;margin:0 auto;padding:32px 20px}
+        $css = <<<'CSS'
+.ext-frame a{color:inherit;text-decoration:none}
+.wrap{max-width:680px;margin:0 auto}
 h1{font-size:26px;margin:0 0 4px}.sub{color:rgb(var(--c-muted));margin:0 0 24px}
 .it{display:flex;align-items:flex-start;gap:12px;background:rgb(var(--c-surface));border:1px solid rgb(var(--c-border));border-radius:var(--c-radius,12px);padding:14px 16px;margin-bottom:12px;transition:border-color .15s}
 .it:hover{border-color:rgb(var(--c-primary))}
@@ -168,11 +152,11 @@ h1{font-size:26px;margin:0 0 4px}.sub{color:rgb(var(--c-muted));margin:0 0 24px}
 .t{font-weight:700;font-size:16px;color:rgb(var(--c-text))}.it:hover .t{color:rgb(var(--c-primary))}
 .ex{color:rgb(var(--c-muted));font-size:14px}
 .empty{padding:60px;text-align:center;color:rgb(var(--c-muted));border:1px dashed rgb(var(--c-border));border-radius:var(--c-radius,12px)}
-</style></head><body>
-{$header}
-<div class="wrap"><h1>📰 Your feed</h1><p class="sub">The latest from members you follow.</p>
-<div id="list">{$items}</div></div>
-</body></html>
-HTML;
+CSS;
+
+        $bodyHtml = '<div class="wrap"><h1>📰 Your feed</h1><p class="sub">The latest from members you follow.</p>'
+            .'<div id="list">'.$items.'</div></div>';
+
+        return ExtPage::render('Feed', $bodyHtml, $css);
     }
 }
