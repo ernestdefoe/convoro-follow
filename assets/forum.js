@@ -66,22 +66,6 @@
     },
   });
 
-  // ---- Header nav "Feed" link (logged-in members only). ----
-  window.Convoro.registerSlot('header:nav', {
-    ext: 'convoro-follow',
-    order: 5,
-    mount: function (el) {
-      fetch('/api/ext/follow/me', { headers: { Accept: 'application/json' } })
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) {
-          if (!d || !d.loggedIn) return;
-          var a = document.createElement('a');
-          a.href = '/feed';
-          a.className = 'rounded-lg px-3 py-2 text-sm font-semibold text-ink-2 hover:bg-surface-2';
-          a.textContent = 'Feed';
-          el.appendChild(a);
-        })
-        .catch(function () {});
-    },
-  });
+  // The "Feed" header nav link is declared in extension.json ("nav", auth-only)
+  // and rendered server-side, so it appears instantly for logged-in members.
 })();
